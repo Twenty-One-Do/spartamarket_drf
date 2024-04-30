@@ -2,7 +2,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # Products
+    # products
     path('', views.Products.as_view()),
     path('<int:what>', views.Products.as_view()),
     # Comments
