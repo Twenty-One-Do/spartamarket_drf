@@ -52,7 +52,7 @@ class Accounts(APIView):
         if request.user.id != who:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
-        user = get_object_or_404(User, pk=who)
+        user = get_object_or_404(User, id=who)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
