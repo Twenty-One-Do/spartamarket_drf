@@ -3,7 +3,7 @@ from django.db import models
 
 class User(AbstractUser):
     name = models.CharField(max_length=10, default="")
-    nickname = models.CharField(max_length=10, default="")
+    nickname = models.CharField(max_length=10, default="", unique=True)
     age = models.PositiveSmallIntegerField(default=0)
 
 class Follow(models.Model):
