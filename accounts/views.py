@@ -7,7 +7,6 @@ class Accounts(APIView):
         pass
 
     def post(self, request):
-        print("asdasd")
         pass
 
     def put(self, request, who):
