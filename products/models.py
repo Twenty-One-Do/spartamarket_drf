@@ -19,7 +19,7 @@ class Product(models.Model):
     category = models.ForeignKey(ProductCategory,
                                  on_delete=models.SET(get_default_category),
                                  null=True)
-    image = models.ImageField(upload_to='../static/images/', blank=True)
+    image = models.ImageField(upload_to='images/', blank=True)
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
 

@@ -6,7 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     "43.201.72.215",
@@ -104,6 +104,9 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
