@@ -11,7 +11,7 @@ urlpatterns = [
     # AccountsCRUD
     path('', views.Accounts.as_view()),
     path('<int:who>', views.Accounts.as_view()),
-
+    path('password/', views.password_change),
     # Follow
     path('follow/', views.Follow.as_view()),
 ]
