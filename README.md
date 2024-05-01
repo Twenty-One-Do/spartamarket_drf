@@ -17,3 +17,7 @@
 ## 📜 API 명세
 
 [Sparta Market.postman_collection.json](https://github.com/Twenty-One-Do/spartamarket_drf/files/15177076/Sparta.Market.postman_collection.json)
+
+## 💻 배포
+
+http://43.201.72.215:8000/
