@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 
-from .models import Product, Tag, Tag_Relation, Comment, Likes_Relation
+from .models import Product, Tag, Tag_Relation, Comment, Likes_Relation, Views_Relation
 from .serializers import ProductSerializer, CommentSerializer
 
 import re
@@ -46,6 +46,18 @@ class Products(APIView):
 
     def get(self, request, what):
         product = get_object_or_404(Product, id=what)
+
+        if request.user.is_authenticated:
+            view_relation, create = Views_Relation.objects.get_or_create(
+                product_id=product,
+                user_id=request.user
+            )
+
+            if create:
+                product.views_num = F('views_num') + 1
+                product.save()
+                product.refresh_from_db()
+
         serializer = ProductSerializer(product)
         return Response(serializer.data)
 
