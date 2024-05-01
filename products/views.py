@@ -4,12 +4,19 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from .models import Product, Tag, Tag_Relation, Comment, Likes_Relation, Views_Relation
-from .serializers import ProductSerializer, CommentSerializer
+from .serializers import ProductSerializer, CommentSerializer, ProductDetailSerializer
 
 import re
 tag_pattern = re.compile(r'^[가-힣#\s]+$')
+order_query_dict = {
+    "latest": "-date_created",
+    "old": "date_created",
+    "popular": "-likes_num",
+    "views": "-views_num",
+}
 
 class ProductList(APIView):
 
@@ -17,13 +24,40 @@ class ProductList(APIView):
         tags = raw_tags.replace(' ', '').split('#')[1:]
         for tag_name in tags:
             tag, create = Tag.objects.get_or_create(name=tag_name)
-            if create:
-                Tag_Relation.objects.get_or_create(tag_id=tag, product_id=product)
+            Tag_Relation.objects.get_or_create(tag_id=tag, product_id=product)
 
     def get(self, request):
-        product = Product.objects.all()
+        page = request.data.get('page')
+
+        try:
+            order_by_message = request.data.get('order')
+            order = request.data.get('order')
+            order = order_query_dict[order]
+        except KeyError:
+            order_by_message = \
+                f"""The key {request.data.get('order')} did not exist, so it was replaced with latest."""
+            order = order_query_dict['latest']
+
+        product = Product.objects.all().order_by(order, 'title')
+        paginator = Paginator(product, 10)
+        try:
+            product = paginator.page(page)
+        except PageNotAnInteger:
+            product = paginator.page(1)
+        except EmptyPage:
+            product = paginator.page(paginator.num_pages)
         serializer = ProductSerializer(product, many=True)
-        return Response(serializer.data)
+
+        return Response(
+            {
+                "meta": {
+                    "num_pages": paginator.num_pages,
+                    "order_by": order_by_message,
+                },
+                "datas": serializer.data
+             }
+        )
+
 
     def post(self, request):
         self.permission_classes = [IsAuthenticated]
@@ -58,7 +92,7 @@ class Products(APIView):
                 product.save()
                 product.refresh_from_db()
 
-        serializer = ProductSerializer(product)
+        serializer = ProductDetailSerializer(product)
         return Response(serializer.data)
 
     def put(self, request, what):
@@ -70,6 +104,7 @@ class Products(APIView):
         if serializer.is_valid():
             serializer.save(writer=request.user)
             return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, what):
         self.permission_classes = [IsAuthenticated]

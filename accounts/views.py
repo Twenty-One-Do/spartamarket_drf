@@ -1,5 +1,6 @@
 from django.db.models import F
 from rest_framework import status
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
@@ -30,14 +31,11 @@ class Accounts(APIView):
         else:
             return Response(userserializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def put(self, request, who):
+    def put(self, request):
         self.permission_classes = [IsAuthenticated]
         self.check_permissions(request)
 
-        if request.user.id != who:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-
-        user = get_object_or_404(User, pk=who)
+        user = request.user
         serializer = UserSerializer(user, data=request.data, partial=True)
 
         if serializer.is_valid():
@@ -46,16 +44,17 @@ class Accounts(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, who):
+    def delete(self, request):
         self.permission_classes = [IsAuthenticated]
         self.check_permissions(request)
 
-        if request.user.id != who:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+        user = request.user
 
-        user = get_object_or_404(User, id=who)
-        user.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        if user.check_password(request.data.get('password')):
+            user.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
 class Follow(APIView):
 
@@ -102,3 +101,30 @@ class Follow(APIView):
             },
             status=response_status
         )
+
+@api_view(['PUT'])
+def password_change(request):
+    original_password = request.data.get('original_password')
+    new_password = request.data.get('new_password')
+    new_password2 = request.data.get('new_password2')
+    user = request.user
+
+    if not user.check_password(original_password):
+        return Response(
+            {
+                'error': 'Invalid password',
+            },
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    if new_password != new_password2:
+        return Response(
+            {
+                'new_password': 'passwords do not match',
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    user.set_password(new_password)
+    user.save()
+    return Response(status=status.HTTP_200_OK)
