@@ -6,17 +6,16 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = (
-            'title',
-            'content',
-            'writer',
-            'likes_num',
-            'views_num',
-            'category',
-            'image',
-            'date_created',
-            'last_updated',
-        )
+        fields = ('id',
+                  'title',
+                  'content',
+                  'writer',
+                  'likes_num',
+                  'views_num',
+                  'category',
+                  'image',
+                  'date_created',
+                  'last_updated',)
         read_only_fields = (
             'writer',
             'likes_num',
@@ -49,7 +48,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 class ProductDetailSerializer(ProductSerializer):
     comments = CommentSerializer(many=True, read_only=True)
-    tags = TagSerializer(many=True, read_only=True)#serializers.SerializerMethodField()
+    tags = TagSerializer(many=True, read_only=True)
 
     class Meta(ProductSerializer.Meta):
         fields = ProductSerializer.Meta.fields + ('comments', 'tags')

@@ -51,7 +51,7 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
     def update(self, instance, validated_data):
-        validated_data.pop('password', None)
+        validated_data.pop('password', None)# 이부분 나중에 validate 오버라이딩 해서 지울것
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
