@@ -11,6 +11,9 @@
 ## 🖥️개발 환경
 - BE: Django, Django ORM, DRF, JWT
 
-## ERD
+## 📜 ERD
+![image](https://github.com/Twenty-One-Do/spartamarket_drf/assets/156996387/eb5947a2-770c-47a0-8541-4c6c3626d18f)
 
-## API 명세
+## 📜 API 명세
+
+[Sparta Market.postman_collection.json](https://github.com/Twenty-One-Do/spartamarket_drf/files/15177076/Sparta.Market.postman_collection.json)
