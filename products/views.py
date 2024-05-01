@@ -1,10 +1,11 @@
+from django.db.models import F
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 
-from .models import Product, Tag, Tag_Relation, Comment
+from .models import Product, Tag, Tag_Relation, Comment, Likes_Relation
 from .serializers import ProductSerializer, CommentSerializer
 
 import re
@@ -106,3 +107,26 @@ class Likes(APIView):
     def post(self, request):
         self.permission_classes = [IsAuthenticated]
         self.check_permissions(request)
+        product_id = request.data.get('what')
+        product = get_object_or_404(Product, id=product_id)
+
+        like_relation, create = Likes_Relation.objects.get_or_create(
+            product_id=product,
+            user_id=request.user
+        )
+
+        if create:
+            product.likes_num = F('likes_num') + 1
+            response_status = status.HTTP_201_CREATED
+        else:
+            product.likes_num = F('likes_num') - 1
+            like_relation.delete()
+            response_status = status.HTTP_204_NO_CONTENT
+
+        product.save()
+        product.refresh_from_db()
+
+        return Response(
+            {'new_likes_num':product.likes_num},
+                status=response_status
+        )

@@ -9,5 +9,5 @@ urlpatterns = [
     path('<int:what>/comments/', views.Comments.as_view()),
     path('comments/<int:comment_id>', views.Comments.as_view()),
     # Likes
-    path('likes', views.Likes.as_view()),
+    path('likes/', views.Likes.as_view()),
 ]
