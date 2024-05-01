@@ -1,3 +1,4 @@
+from django.db.models import F
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -5,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from .serializers import UserSerializer
 from django.shortcuts import get_object_or_404
 
-from .models import User
+from .models import User, Follow_Relation
 
 class Accounts(APIView):
 
@@ -61,4 +62,43 @@ class Follow(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        pass
+        who = request.user
+
+        whom = get_object_or_404(
+            User,
+            id=request.data.get('whom')
+        )
+
+        follow_relation, create = \
+            Follow_Relation.objects.get_or_create(
+                who=who,
+                whom=whom
+            )
+
+        if create:
+            who.following_num = F('following_num') + 1
+            whom.follower_num = F('follower_num') + 1
+            response_status = status.HTTP_201_CREATED
+        else:
+            who.following_num = F('following_num') - 1
+            whom.follower_num = F('follower_num') - 1
+            follow_relation.delete()
+            response_status = status.HTTP_204_NO_CONTENT
+
+        who.save()
+        whom.save()
+        who.refresh_from_db()
+        whom.refresh_from_db()
+        return Response(
+            {
+                'my': {
+                    'new_follower_num': who.follower_num,
+                    'new_following_num': who.following_num,
+                },
+                'whom': {
+                    'new_follower_num': whom.follower_num,
+                    'new_following_num': whom.following_num,
+                },
+            },
+            status=response_status
+        )

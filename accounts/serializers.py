@@ -25,6 +25,8 @@ class UserSerializer(serializers.ModelSerializer):
             'is_superuser',
             'is_staff',
             'is_active',
+            'follower_num',
+            'following_num',
         )
 
     def validate(self, data):
