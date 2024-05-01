@@ -1,4 +1,4 @@
-from .models import Product, Comment
+from .models import Product, Comment, Tag
 from rest_framework import serializers
 from .models import Product
 
@@ -36,3 +36,21 @@ class CommentSerializer(serializers.ModelSerializer):
             'date_created',
             'last_updated',
         )
+
+class TagSerializer(serializers.ModelSerializer):
+
+    name = serializers.SerializerMethodField()
+    class Meta:
+        model = Tag
+        fields = '__all__'
+
+    def get_name(self, obj):
+        return obj.tag_id.name
+
+class ProductDetailSerializer(ProductSerializer):
+    comments = CommentSerializer(many=True, read_only=True)
+    tags = TagSerializer(many=True, read_only=True)#serializers.SerializerMethodField()
+
+    class Meta(ProductSerializer.Meta):
+        fields = ProductSerializer.Meta.fields + ('comments', 'tags')
+

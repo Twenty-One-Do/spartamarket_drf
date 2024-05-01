@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from .models import Product, Tag, Tag_Relation, Comment, Likes_Relation, Views_Relation
-from .serializers import ProductSerializer, CommentSerializer
+from .serializers import ProductSerializer, CommentSerializer, ProductDetailSerializer
 
 import re
 tag_pattern = re.compile(r'^[가-힣#\s]+$')
@@ -24,8 +24,7 @@ class ProductList(APIView):
         tags = raw_tags.replace(' ', '').split('#')[1:]
         for tag_name in tags:
             tag, create = Tag.objects.get_or_create(name=tag_name)
-            if create:
-                Tag_Relation.objects.get_or_create(tag_id=tag, product_id=product)
+            Tag_Relation.objects.get_or_create(tag_id=tag, product_id=product)
 
     def get(self, request):
         page = request.data.get('page')
@@ -40,7 +39,7 @@ class ProductList(APIView):
             order = order_query_dict['latest']
 
         product = Product.objects.all().order_by(order, 'title')
-        paginator = Paginator(product, 2)
+        paginator = Paginator(product, 10)
         try:
             product = paginator.page(page)
         except PageNotAnInteger:
@@ -93,7 +92,7 @@ class Products(APIView):
                 product.save()
                 product.refresh_from_db()
 
-        serializer = ProductSerializer(product)
+        serializer = ProductDetailSerializer(product)
         return Response(serializer.data)
 
     def put(self, request, what):
